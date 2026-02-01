@@ -3,9 +3,16 @@
  * Extracts text from PDF buffers for policy analysis
  */
 
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse");
+// Use dynamic import for pdf-parse to avoid bundling issues
+let pdfParse: any;
+
+async function loadPdfParse() {
+  if (!pdfParse) {
+    // In production, pdf-parse is external dependency
+    pdfParse = (await import("pdf-parse")).default;
+  }
+  return pdfParse;
+}
 
 export interface PDFExtractionResult {
   text: string;
@@ -28,7 +35,8 @@ export async function extractTextFromPDF(
     console.log("PDF Buffer type:", typeof pdfBuffer);
     console.log("Is Buffer?", Buffer.isBuffer(pdfBuffer));
     
-    const data = await pdfParse(pdfBuffer);
+    const parser = await loadPdfParse();
+    const data = await parser(pdfBuffer);
 
     console.log("PDF parsed successfully:", data.numpages, "pages");
 
