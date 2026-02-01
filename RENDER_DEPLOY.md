@@ -26,7 +26,7 @@ In the Render dashboard, add these environment variables:
 ```env
 DATABASE_URL=your_postgresql_connection_string
 AI_PROVIDER=gemini
-GEMINI_API_KEY=AIzaSyCDoZKAVvtsLE6tXU4jJqj7IeAL32XqMm4
+GEMINI_API_KEY=your_gemini_api_key_here
 AI_MODEL=gemini-flash-latest
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
