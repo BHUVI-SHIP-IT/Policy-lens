@@ -4,7 +4,7 @@ import {
   BadgeCheck,
   Bot,
   FileText,
-  GraduationCap,
+
   MessageCircle,
   ShieldCheck,
   Sparkles,
@@ -32,31 +32,36 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { useAuth } from "@/hooks/use-auth";
+import { LogOut } from "lucide-react";
+
 function TopNav() {
+  const { user, logout } = useAuth();
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div
-          className="grid h-10 w-10 place-items-center rounded-2xl bg-white/70 ring-1 ring-border backdrop-blur"
+          className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-primary to-blue-600 shadow-lg shadow-primary/20"
           data-testid="img-brandmark"
         >
           <div className="relative">
-            <ShieldCheck className="h-5 w-5 text-primary" strokeWidth={2.2} />
+            <ShieldCheck className="h-6 w-6 text-white" strokeWidth={2.5} />
             <Sparkles
-              className="absolute -right-2 -top-2 h-4 w-4 text-emerald-600"
-              strokeWidth={2.2}
+              className="absolute -right-2 -top-2 h-4 w-4 text-yellow-300 animate-pulse"
+              strokeWidth={2.5}
             />
           </div>
         </div>
         <div>
-          <div className="font-display text-lg leading-none" data-testid="text-app-name">
+          <div className="font-display text-xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent" data-testid="text-app-name">
             PolicyLens
           </div>
           <div
-            className="text-xs text-muted-foreground"
+            className="text-xs font-medium text-muted-foreground"
             data-testid="text-app-tagline"
           >
-            AI-Powered Insurance Policy Explainer
+            AI-Powered Policy Analysis
           </div>
         </div>
       </div>
@@ -76,12 +81,32 @@ function TopNav() {
         >
           Impact
         </a>
-        <Link href="/dashboard" data-testid="link-dashboard">
-          <Button className="rounded-full" data-testid="button-nav-analyze">
-            Analyze Policy
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </Link>
+        {user ? (
+          <>
+            <Link href="/dashboard" data-testid="link-dashboard">
+              <Button className="rounded-full" data-testid="button-nav-analyze">
+                Dashboard
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              onClick={() => logout()}
+              data-testid="button-nav-logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </>
+        ) : (
+          <a href="/api/auth/google">
+            <Button className="rounded-full" data-testid="button-nav-signin">
+              Sign in with Google
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </a>
+        )}
       </div>
     </div>
   );
@@ -96,84 +121,83 @@ function Hero() {
         variants={fadeUp}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div
-          className="inline-flex items-center gap-2 rounded-full border bg-white/60 px-3 py-1 text-xs text-muted-foreground shadow-sm backdrop-blur"
-          data-testid="status-hackathon-badge"
-        >
-          <GraduationCap className="h-4 w-4 text-primary" />
-          Smart India Hackathon / FinTech Demo
-        </div>
+
 
         <h1
-          className="mt-5 font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl"
+          className="mt-5 font-display text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl"
           data-testid="text-hero-headline"
         >
           Understand Your Insurance.
-          <span className="block text-primary">Before It’s Too Late.</span>
+          <span className="block bg-gradient-to-r from-primary via-blue-600 to-purple-600 bg-clip-text text-transparent mt-2">
+            Before It's Too Late.
+          </span>
         </h1>
 
         <p
-          className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg"
+          className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl font-medium"
           data-testid="text-hero-subheading"
         >
-          PolicyLens uses AI to simplify insurance policies, highlight hidden
-          exclusions, and help users make informed financial decisions.
+          PolicyLens uses advanced AI to simplify complex insurance policies, uncover hidden
+          exclusions, and empower you with clarity.
         </p>
 
-        <div className="mt-7 flex flex-wrap items-center gap-3">
+        <div className="mt-8 flex flex-wrap items-center gap-4">
           <Link href="/dashboard" data-testid="link-hero-analyze">
             <Button
-              className="rounded-full px-5"
+              className="rounded-full px-8 py-6 text-lg font-bold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 transition-all bg-gradient-to-r from-primary to-blue-600"
               data-testid="button-hero-analyze"
             >
-              Analyze Policy
-              <Wand2 className="h-4 w-4" />
+              Analyze Policy Now
+              <Wand2 className="h-5 w-5" />
             </Button>
           </Link>
           <Link href="/dashboard" data-testid="link-hero-demo">
             <Button
               variant="outline"
-              className="rounded-full bg-white/50"
+              className="rounded-full bg-white/80 px-6 py-6 text-lg font-semibold border-2 hover:bg-white hover:scale-105 transition-all"
               data-testid="button-hero-demo"
             >
-              View Demo
-              <ArrowRight className="h-4 w-4" />
+              Try Demo
+              <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
         </div>
 
-        <div className="mt-8 grid gap-3 sm:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:grid-cols-3">
           {[
             {
-              icon: <BadgeCheck className="h-4 w-4 text-emerald-700" />,
+              icon: <BadgeCheck className="h-5 w-5 text-emerald-600" />,
               title: "Trust-first",
               desc: "Clear, judge-friendly insights",
               tid: "card-benefit-trust",
+              gradient: "from-emerald-50 to-green-50 border-emerald-200"
             },
             {
-              icon: <FileText className="h-4 w-4 text-primary" />,
+              icon: <FileText className="h-5 w-5 text-blue-600" />,
               title: "Plain language",
               desc: "No legal jargon overload",
               tid: "card-benefit-plain",
+              gradient: "from-blue-50 to-indigo-50 border-blue-200"
             },
             {
-              icon: <Bot className="h-4 w-4 text-emerald-700" />,
+              icon: <Bot className="h-5 w-5 text-purple-600" />,
               title: "AI assistant",
               desc: "Ask anything, get clarity",
               tid: "card-benefit-ai",
+              gradient: "from-purple-50 to-pink-50 border-purple-200"
             },
           ].map((b) => (
             <div
               key={b.title}
-              className="glass rounded-2xl p-4"
+              className={`rounded-2xl p-5 border-2 bg-gradient-to-br ${b.gradient} shadow-md hover:shadow-lg hover:scale-105 transition-all`}
               data-testid={b.tid}
             >
-              <div className="flex items-center gap-2 text-sm font-medium">
+              <div className="flex items-center gap-2.5 text-base font-bold">
                 {b.icon}
                 <span data-testid={`text-benefit-title-${b.title}`}>{b.title}</span>
               </div>
               <div
-                className="mt-1 text-sm text-muted-foreground"
+                className="mt-2 text-sm font-medium text-muted-foreground"
                 data-testid={`text-benefit-desc-${b.title}`}
               >
                 {b.desc}
@@ -476,16 +500,10 @@ function Impact() {
 function Footer() {
   return (
     <div className="mt-16 border-t border-border/70 py-10">
-      <div className="flex flex-col justify-between gap-6 sm:flex-row">
-        <div>
-          <div className="font-display text-lg" data-testid="text-footer-name">
-            PolicyLens
-          </div>
-          <div className="mt-1 text-sm text-muted-foreground" data-testid="text-footer-hackathon">
-            Smart India Hackathon \u2014 FinTech\n          </div>
+      <div className="flex justify-center">
+        <div className="font-display text-lg" data-testid="text-footer-name">
+          PolicyLens
         </div>
-        <div className="text-sm text-muted-foreground" data-testid="text-footer-stack">
-          Built with React + Tailwind + Framer Motion + Lucide\n        </div>
       </div>
     </div>
   );

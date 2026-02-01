@@ -8,6 +8,7 @@ import LandingPage from "@/pages/landing";
 import DashboardPage from "@/pages/dashboard";
 import ExclusionsPage from "@/pages/exclusions";
 import ChatPage from "@/pages/chat";
+import HistoryPage from "@/pages/history";
 
 function Router() {
   return (
@@ -16,7 +17,8 @@ function Router() {
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/exclusions" component={ExclusionsPage} />
       <Route path="/chat" component={ChatPage} />
-      <Route component={NotFound} />
+      <Route path="/history" component={HistoryPage} />
+      <Route path="/:rest*" component={NotFound} />
     </Switch>
   );
 }

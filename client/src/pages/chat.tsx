@@ -1,10 +1,13 @@
 import { useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Bot, Send, ShieldCheck, User } from "lucide-react";
+import { Bot, Send, ShieldCheck, User, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useSubmitInsight, normalizeQuestion, detectConfusion, categorizeQuestion } from "@/hooks/use-user-insights";
+import { useAnalysisSession } from "@/hooks/use-session";
+import { useAIChatQuestion } from "@/hooks/use-ai-analysis";
 
 type Role = "user" | "bot";
 
@@ -38,10 +41,10 @@ function Bubble({ role, text }: { role: Role; text: string }) {
     >
       <div
         className={
-          "max-w-[86%] rounded-3xl border px-4 py-3 text-sm leading-relaxed shadow-sm " +
+          "max-w-[86%] rounded-3xl px-5 py-3.5 text-sm leading-relaxed shadow-md " +
           (isUser
-            ? "bg-primary text-primary-foreground border-primary/20"
-            : "bg-white/70 text-foreground border-border")
+            ? "bg-gradient-to-br from-primary to-blue-600 text-white border-2 border-primary/20 shadow-primary/20"
+            : "bg-white text-foreground border-2 border-gray-200 shadow-gray-200/50")
         }
         data-testid={isUser ? "bubble-user" : "bubble-bot"}
       >
@@ -54,7 +57,15 @@ function Bubble({ role, text }: { role: Role; text: string }) {
 export default function ChatPage() {
   const [messages, setMessages] = useState<Msg[]>(starter);
   const [input, setInput] = useState("");
+  const [policyContext] = useState(() => {
+    // Load from localStorage or use demo text
+    const stored = localStorage.getItem('currentPolicyText');
+    return stored || `HDFC ERGO Health Insurance: Covers hospitalization after 36-month waiting for pre-existing conditions. Room rent capped at 1% of sum insured. 48-hour claim intimation required.`;
+  });
   const listRef = useRef<HTMLDivElement | null>(null);
+  const { mutate: submitInsight } = useSubmitInsight();
+  const { session, updateActivity } = useAnalysisSession();
+  const { mutate: askAI, isPending: isAIThinking } = useAIChatQuestion();
 
   const suggestions = useMemo(
     () => [
@@ -71,17 +82,47 @@ export default function ChatPage() {
 
     const userMsg: Msg = { id: `u-${Date.now()}`, role: "user", text: trimmed };
 
-    const botText =
-      trimmed.toLowerCase().includes("dengue")
-        ? "Often yes, but usually after the initial waiting period (e.g., 30 days) and sometimes with sub-limits. Check room rent caps and exclusions for outbreaks."
-        : trimmed.toLowerCase().includes("late") || trimmed.toLowerCase().includes("intimation")
-          ? "Late claim intimation can lead to delays or partial rejection. Best practice: notify the insurer within the policy’s stated window (often 24–48 hours) and keep proof."
-          : "In simple terms: the policy might cover the event, but certain conditions (waiting period, timelines, documentation) decide whether the claim is paid. Want me to explain a specific clause?";
+    // Track question anonymously
+    submitInsight({
+      normalizedQuestion: normalizeQuestion(trimmed),
+      category: categorizeQuestion(trimmed),
+      isConfused: detectConfusion(trimmed) ? 1 : 0,
+    });
 
-    const botMsg: Msg = { id: `b-${Date.now()}`, role: "bot", text: botText };
-
-    setMessages((m) => [...m, userMsg, botMsg]);
+    setMessages((m) => [...m, userMsg]);
     setInput("");
+
+    // AI-powered chat using Gemini
+    askAI({ policyText: policyContext, question: trimmed }, {
+      onSuccess: (aiResponse) => {
+        const botMsg: Msg = { 
+          id: `b-${Date.now()}`, 
+          role: "bot", 
+          text: aiResponse.answer + (aiResponse.disclaimer ? `\n\n⚠️ ${aiResponse.disclaimer}` : "")
+        };
+        setMessages((m) => [...m, botMsg]);
+        
+        setTimeout(() => {
+          listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+        }, 50);
+      },
+      onError: () => {
+        const errorMsg: Msg = {
+          id: `b-${Date.now()}`,
+          role: "bot",
+          text: "Sorry, I'm having trouble right now. Please try again."
+        };
+        setMessages((m) => [...m, errorMsg]);
+      }
+    });
+
+    // Update session activity
+    if (session) {
+      updateActivity(
+        session.policiesAnalyzed || 0,
+        (session.questionsAsked || 0) + 1
+      );
+    }
 
     setTimeout(() => {
       listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
@@ -97,17 +138,17 @@ export default function ChatPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div
-              className="grid h-10 w-10 place-items-center rounded-2xl bg-white/70 ring-1 ring-border backdrop-blur"
+              className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-primary to-blue-600 shadow-lg shadow-primary/20"
               data-testid="img-chat-brand"
             >
-              <ShieldCheck className="h-5 w-5 text-primary" strokeWidth={2.2} />
+              <ShieldCheck className="h-6 w-6 text-white" strokeWidth={2.5} />
             </div>
             <div>
-              <div className="font-display text-lg leading-none" data-testid="text-chat-title">
-                AI Chat Assistant
+              <div className="font-display text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent" data-testid="text-chat-title">
+                AI Assistant
               </div>
-              <div className="text-xs text-muted-foreground" data-testid="text-chat-subtitle">
-                Friendly, fintech-style explanations
+              <div className="text-sm font-medium text-muted-foreground" data-testid="text-chat-subtitle">
+                Ask questions about your policy
               </div>
             </div>
           </div>
@@ -119,11 +160,12 @@ export default function ChatPage() {
           </Link>
         </div>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_0.45fr]">
-          <Card className="glass rounded-3xl" data-testid="card-chat">
+        <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_0.45fr]">
+          <Card className="glass rounded-3xl border-2 border-white/60 shadow-xl" data-testid="card-chat">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg" data-testid="text-chat-card-title">
-                PolicyLens Assistant
+              <CardTitle className="text-xl font-bold text-foreground flex items-center gap-2" data-testid="text-chat-card-title">
+                <Bot className="h-6 w-6 text-primary" />
+                PolicyLens AI Chat
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -158,28 +200,29 @@ export default function ChatPage() {
             </CardContent>
           </Card>
 
-          <Card className="glass rounded-3xl" data-testid="card-suggestions">
+          <Card className="glass rounded-3xl border-2 border-white/60 shadow-xl" data-testid="card-suggestions">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg" data-testid="text-suggestions-title">
-                Example questions
+              <CardTitle className="text-xl font-bold text-foreground flex items-center gap-2" data-testid="text-suggestions-title">
+                <Sparkles className="h-5 w-5 text-amber-500" />
+                Quick Questions
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-3">
               {suggestions.map((s, idx) => (
                 <button
                   key={s}
-                  className="w-full rounded-2xl border bg-white/55 p-3 text-left text-sm transition hover:bg-white/65"
+                  className="w-full rounded-2xl border-2 border-white/80 bg-gradient-to-br from-white to-blue-50/30 p-4 text-left text-sm font-medium transition-all hover:shadow-lg hover:scale-[1.02] hover:border-primary/30"
                   onClick={() => setInput(s)}
                   data-testid={`button-suggestion-${idx}`}
                 >
-                  <span className="inline-flex items-center gap-2">
-                    <Bot className="h-4 w-4 text-primary" />
+                  <span className="inline-flex items-center gap-2.5">
+                    <Bot className="h-4.5 w-4.5 text-primary" />
                     {s}
                   </span>
                 </button>
               ))}
-              <div className="pt-2 text-xs text-muted-foreground" data-testid="text-suggestions-note">
-                Responses are mock (demo-only) — replace with your model later.
+              <div className="pt-2 text-sm font-medium text-primary/70" data-testid="text-suggestions-note">
+                {policyContext.length > 200 ? "✨ AI analyzing your uploaded policy document" : "📄 Using demo policy for questions"}
               </div>
             </CardContent>
           </Card>
