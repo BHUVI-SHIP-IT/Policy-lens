@@ -1,0 +1,110 @@
+You are a senior frontend engineer and UI/UX designer.
+Design a premium, modern, and visually stunning frontend for a hackathon project called
+“PolicyLens – AI-Powered Insurance Policy Explainer”.
+
+This is a Smart India Hackathon / FinTech hackathon project.
+The frontend MUST look professional, trustworthy, and innovative — not basic.
+
+TECH STACK:
+- Next.js (React)
+- Tailwind CSS
+- Framer Motion for animations
+- Lucide or Hero Icons
+- No backend logic needed (mock data allowed)
+
+DESIGN GOALS:
+- Clean, modern FinTech aesthetic
+- High readability (insurance users are non-technical)
+- Subtle but impressive animations
+- Judge-friendly, demo-ready UI
+- Looks like a real startup product
+
+COLOR & STYLE:
+- Primary: Deep Blue / Indigo (trust, finance)
+- Secondary: Emerald / Teal (clarity, safety)
+- Background: Light gray / off-white
+- Accent: Soft yellow or green for highlights & alerts
+- Rounded cards, soft shadows, glassmorphism (subtle)
+- No flashy neon colors
+
+PAGES / SECTIONS TO BUILD:
+
+1. HERO LANDING PAGE
+- Big bold headline:
+  “Understand Your Insurance. Before It’s Too Late.”
+- Subheading:
+  “PolicyLens uses AI to simplify insurance policies, highlight hidden exclusions, and help users make informed financial decisions.”
+- CTA Buttons:
+  [Analyze Policy]  [View Demo]
+- Animated shield + lens + document illustration
+- Smooth fade-in animations on scroll
+
+2. HOW IT WORKS SECTION
+- Step-by-step horizontal cards:
+  1. Upload or paste policy text
+  2. AI analyzes clauses & exclusions
+  3. Plain-language summary + risks
+- Each step with icon + short description
+- Animated progress flow between steps
+
+3. POLICY ANALYSIS DASHBOARD (MAIN SCREEN)
+- Left panel:
+  - Policy input box (paste text)
+  - “Analyze Policy” button
+- Right panel (results):
+  - Plain-language summary card
+  - Highlighted exclusions card (yellow/red accent)
+  - “What this means for you” explanation
+- Add loading animation while “AI is analyzing”
+
+4. EXCLUSION HIGHLIGHT VIEW
+- Card-based layout showing:
+  - Clause text (highlighted)
+  - Simple explanation below it
+  - Risk badge: Low / Medium / High
+- Color-coded risk indicators
+- Tooltip explaining why it matters
+
+5. AI CHAT ASSISTANT UI
+- Chat interface like a fintech assistant
+- Example questions:
+  “Is dengue covered?”
+  “What happens if I file a claim late?”
+- Bot responses in clear, friendly language
+- Chat bubbles with subtle animations
+
+6. IMPACT & VALUE SECTION
+- Metrics-style cards:
+  - “Prevents claim surprises”
+  - “Improves financial confidence”
+  - “Citizen-centric FinTech”
+- Icons + short one-liners
+- Strong alignment with Smart India Hackathon themes
+
+7. FOOTER
+- Project name: PolicyLens
+- Hackathon: Smart India Hackathon
+- Tech stack used
+- Clean, minimal layout
+
+ANIMATIONS:
+- Use Framer Motion for:
+  - Section fade-ins
+  - Card hover effects
+  - Button micro-interactions
+- Animations must feel premium, not gimmicky
+
+CODE QUALITY REQUIREMENTS:
+- Clean component structure
+- Reusable components
+- Proper Tailwind utility usage
+- Mobile responsive
+- Accessible fonts & contrast
+
+IMPORTANT:
+- The UI must instantly communicate TRUST + CLARITY
+- This should look like a real FinTech startup, not a college project
+- Prioritize UX and visual hierarchy
+- Mock realistic data where backend is missing
+
+Generate the full frontend code with components, pages, and styling.
